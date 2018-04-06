@@ -44,7 +44,6 @@ public class Echiquier extends JPanel implements MouseListener, MouseMotionListe
 	 * Constructeur de l'échiquier
 	 */
 	public Echiquier() {
-		//*/
 		pieces = new Piece[][] {
 			{new Piece(false, TypePiece.TOUR), 	   new Piece(false, TypePiece.PION), null, null, null, null, new Piece(true, TypePiece.PION), new Piece(true, TypePiece.TOUR)},
 			{new Piece(false, TypePiece.CAVALIER), new Piece(false, TypePiece.PION), null, null, null, null, new Piece(true, TypePiece.PION), new Piece(true, TypePiece.CAVALIER)},
@@ -55,20 +54,6 @@ public class Echiquier extends JPanel implements MouseListener, MouseMotionListe
 			{new Piece(false, TypePiece.CAVALIER), new Piece(false, TypePiece.PION), null, null, null, null, new Piece(true, TypePiece.PION), new Piece(true, TypePiece.CAVALIER)},
 			{new Piece(false, TypePiece.TOUR), 	   new Piece(false, TypePiece.PION), null, null, null, null, new Piece(true, TypePiece.PION), new Piece(true, TypePiece.TOUR)}
 		};
-		/*/
-		pieces = new Piece[][] {
-			{new Piece(false, TypePiece.PION), new Piece(false, TypePiece.PION), new Piece(false, TypePiece.PION), new Piece(false, TypePiece.PION), new Piece(false, TypePiece.PION), new Piece(false, TypePiece.PION), new Piece(false, TypePiece.PION), new Piece(false, TypePiece.PION), new Piece(false, TypePiece.PION), new Piece(false, TypePiece.PION)},
-			{null, null, null, null, null, null, null, null, null, null},
-			{new Piece(true, TypePiece.FOU), null, null, null, new Piece(true, TypePiece.FOU), null, null, null, null, null},
-			{null, new Piece(true, TypePiece.FOU), null, new Piece(true, TypePiece.FOU), null, null, null, null, null, null},
-			{null, null, new Piece(false, TypePiece.FOU), null, null, null, null, null, null, null},
-			{null, new Piece(true, TypePiece.FOU), null, new Piece(true, TypePiece.FOU), null, null, null, null, null, null},
-			{new Piece(true, TypePiece.FOU), null, null, null, new Piece(true, TypePiece.FOU), null, null, null, null, null},
-			{null, null, null, null, new Piece(false, TypePiece.FOU), null, null, null, null, null},
-			{null, null, null, null, null, null, null, null, null, null},
-			{null, null, null, null, null, null, null, null, null, null}
-		};
-		/**/
 	}
 
 	@Override
@@ -106,13 +91,13 @@ public class Echiquier extends JPanel implements MouseListener, MouseMotionListe
 				}
 				else if (selected && deplacementPossible(pieces[selectX][selectY], x, y)) {
 					// Case déplacement possible
-					if (peutManger(pieces[selectX][selectY], x, y))
+					if (pieces[x][y] != null) {
 						g.setColor(Color.RED);
-					else
+					} else {
 						g.setColor(Color.GREEN);
+					}
 					g.fillRect(x*taillePlateauX/8+posX, y*taillePlateauY/8+posY, taillePlateauX/8, taillePlateauY/8);
-				}
-				else {
+				} else {
 					// Case blanche / noire
 					if (caseBlanche) g.setColor(Color.WHITE);
 					else g.setColor(Color.GRAY);
@@ -123,39 +108,6 @@ public class Echiquier extends JPanel implements MouseListener, MouseMotionListe
 			}
 			caseBlanche = !caseBlanche;
 		}
-	}
-	
-	private boolean peutManger(Piece mangeur, int toX, int toY) {
-		int fromX = getPosXPiece(mangeur);
-		int fromY = getPosYPiece(mangeur);
-		
-		switch (mangeur.getType()) {
-			case CAVALIER:
-			case FOU:
-			case REINE:
-			case ROI:
-			case TOUR:
-			default:
-				return pieces[toX][toY] != null && deplacementPossible(mangeur, toX, toY);
-			case PION:
-				if (Math.abs(fromX - toX) == 1) {
-					if (fromX+1 == toX && pieces[toX][toY] != null && couleursDifferente(mangeur, pieces[toX][toY])) {
-						if (mangeur.estBlanc() && fromY-1 == toY)
-							return true;
-						if (!mangeur.estBlanc() && fromY+1 == toY)
-							return true;
-					}
-					else if (fromX-1 == toX && pieces[toX][toY] != null && couleursDifferente(mangeur, pieces[toX][toY])) {
-						if (mangeur.estBlanc() && fromY-1 == toY)
-							return true;
-						if (!mangeur.estBlanc() && fromY+1 == toY)
-							return true;
-					}
-					return false;
-				}
-			break;
-		}
-		return true;
 	}
 	
 	private int getPosXPiece(Piece p) {
@@ -215,34 +167,18 @@ public class Echiquier extends JPanel implements MouseListener, MouseMotionListe
 				break;
 				
 			case FOU:
-				return false;
-				//if (toX - fromX != toY - fromY && toX - fromX != fromY - toY) return false;
-				//if (!diagonaleDispo(toX, toY)) return false;
-				//break;
+				if (toX - fromX != toY - fromY && toX - fromX != fromY - toY) return false;
+				if (!diagonaleDispo(fromX, fromY, toX, toY)) return false;
+				break;
 				
 			case PION:
 				// TODO coup "en passant"
-				if (pieceABouger.estBlanc()) {
-					if (fromY < toY) return false;
-					if (!pieceABouger.hasMoved()) {
-						if (fromY-2 > toY || pieces[toX][toY] != null) return false;
-					} else {
-						if (fromY-1 > toY || pieces[toX][toY] != null) return false;
-					}
-				} else {
-					if (fromY > toY) return false;
-					if (!pieceABouger.hasMoved()) {
-						if (fromY+2 < toY || pieces[toX][toY] != null) return false;
-					} else {
-						if (fromY+1 < toY || pieces[toX][toY] != null) return false;
-					}
-				}
-				break;
+				return deplacementPionPossible(pieceABouger, fromX, fromY, toX, toY);
 				
 			case REINE:
 				// Cas : diagonale
 				if (toX - fromX == toY - fromY || toX - fromX == fromY - toY) {
-					if (!diagonaleDispo(toX, toY)) {
+					if (!diagonaleDispo(fromX, fromY, toX, toY)) {
 						return false;
 					}
 				}
@@ -257,7 +193,6 @@ public class Echiquier extends JPanel implements MouseListener, MouseMotionListe
 				}
 				break;
 		}
-		System.out.println(pieceABouger.getType() + " " + (pieceABouger.estBlanc()?"blanc":"noir") + " peut aller en " + toX + " " + toY);
 		return true;
 	}
 	
@@ -303,9 +238,14 @@ public class Echiquier extends JPanel implements MouseListener, MouseMotionListe
 				Piece p = pieces[x][y];
 				if (p != null && couleursDifferente(roi, p)) {
 					// Si la pièce peut se déplacer sur la case du roi : il est en échec
-					if (deplacementPossible(p, posX, posY)) {
-						//System.out.println("NOT OK - " + x + " " + y + " " + p.getType() + " " + p.estBlanc());
-						return true;
+					if (p.getType() != TypePiece.PION) {
+						if (deplacementPossible(p, posX, posY)) {
+							return true;
+						}
+					} else {
+						if (deplacementPionPossible(p, x, y, posX, posY, true)) {
+							return true;
+						}
 					}
 				}
 			}
@@ -313,29 +253,81 @@ public class Echiquier extends JPanel implements MouseListener, MouseMotionListe
 		return false;
 	}
 	
-	private boolean diagonaleDispo(int toX, int toY) {
+	private boolean deplacementPionPossible(Piece pion, int fromX, int fromY, int toX, int toY) {
+		return deplacementPionPossible(pion, fromX, fromY, toX, toY, true) || deplacementPionPossible(pion, fromX, fromY, toX, toY, false);
+	}
+	
+	private boolean deplacementPionPossible(Piece pion, int fromX, int fromY, int toX, int toY, boolean manger) {
+		// TODO coup "en passant"
+		if (Math.abs(fromX-toX) > 1) return false;
+		if (Math.abs(fromY - toY) > 2) return false;
+		if (fromX-toX != 0 && !manger) return false;
+		
+		if (fromX != toX) {
+			if (!manger) return false;
+			if (pion.estBlanc() && fromY - toY != 1) return false;
+			if (!pion.estBlanc() && toY - fromY != 1) return false;
+			
+			if (fromX+1 == toX) {
+				if (pieces[toX][toY] == null || !couleursDifferente(pion, pieces[toX][toY])) return false;
+				if (pion.estBlanc() && fromY-1 == toY)
+					return true;
+				if (!pion.estBlanc() && fromY+1 == toY)
+					return true;
+			}
+			else if (fromX-1 == toX) {
+				if (pieces[toX][toY] == null || !couleursDifferente(pion, pieces[toX][toY])) return false;
+				if (pion.estBlanc() && fromY-1 == toY)
+					return true;
+				if (!pion.estBlanc() && fromY+1 == toY)
+					return true;
+			}
+			return false;
+		}
+		else {
+			if (manger) return false;
+			if (pion.estBlanc()) {
+				if (fromY < toY) return false;
+				if (!pion.hasMoved()) {
+					if (fromY-2 > toY || pieces[toX][toY] != null) return false;
+				} else {
+					if (fromY-1 > toY || pieces[toX][toY] != null) return false;
+				}
+			} else {
+				if (fromY > toY) return false;
+				if (!pion.hasMoved()) {
+					if (fromY+2 < toY || pieces[toX][toY] != null) return false;
+				} else {
+					if (fromY+1 < toY || pieces[toX][toY] != null) return false;
+				}
+			}
+			return true;
+		}
+	}
+	
+	private boolean diagonaleDispo(int fromX, int fromY, int toX, int toY) {
 		for (int i = 1 ; i < 7 ; i++) {
-			if (selectX < toX) {
-				if (selectY < toY) {
+			if (fromX < toX) {
+				if (fromY < toY) {
 					// BAS DROIT
-					if (selectX+i < 8 && selectY+i<8 && pieces[selectX+i][selectY+i] != null && selectX+i < toX) {
+					if (fromX+i < 8 && fromY+i<8 && pieces[fromX+i][fromY+i] != null && fromX+i < toX) {
 						return false;
 					}
 				} else {
 					// HAUT DROIT
-					if (selectX+i < 8 && selectY-i>=0 && pieces[selectX+i][selectY-i] != null && selectX+i < toX) {
+					if (fromX+i < 8 && fromY-i>=0 && pieces[fromX+i][fromY-i] != null && fromX+i < toX) {
 						return false;
 					}
 				}
 			} else {
-				if (selectY < toY) {
+				if (fromY < toY) {
 					// BAS GAUCHE
-					if (selectX-i >= 0 && selectY+i < 8 && pieces[selectX-i][selectY+i] != null && selectX-i > toX) {
+					if (fromX-i >= 0 && fromY+i < 8 && pieces[fromX-i][fromY+i] != null && fromX-i > toX) {
 						return false;
 					}
 				} else {
 					// HAUT GAUCHE
-					if (selectX-i >= 0 && selectY-i>=0 && pieces[selectX-i][selectY-i] != null && selectX-i > toX) {
+					if (fromX-i >= 0 && fromY-i>=0 && pieces[fromX-i][fromY-i] != null && fromX-i > toX) {
 						return false;
 					}
 				}
@@ -461,14 +453,12 @@ public class Echiquier extends JPanel implements MouseListener, MouseMotionListe
 		if (selectY < 0 || selectY > 7)
 			return;
 		
-		// TODO décommenter
-		/*
 		if (!deplacementPossible(p, to_X, to_Y)) {
 			selectX = -1;
 			selectY = -1;
 			selected = false;
 			return;
-		}*/
+		}
 		
 		pieceEnDeplacement = pieces[selectX][selectY];
 		pieceEnDeplacement.setMoved(true);
@@ -590,4 +580,11 @@ public class Echiquier extends JPanel implements MouseListener, MouseMotionListe
 	public void setFenetre(JFrame fenetre) {
 		this.fenetre = fenetre;
 	}
+
+	
+	public Piece getPiece(int x, int y) {
+		return pieces[x][y];
+	}
+
+	
 }
